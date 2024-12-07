@@ -277,9 +277,7 @@ export const App: React.FC = () => {
     }
 
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (conversations[currentConversationIndex]) {
-        handleKeyboardShortcuts(event, handleSend, toggleListening, newLine);
-      }
+      handleKeyboardShortcuts(event, handleSend, toggleListening, newLine);
     };
 
     window.addEventListener('keydown', handleKeyDown);

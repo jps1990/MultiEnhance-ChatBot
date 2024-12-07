@@ -1,5 +1,5 @@
 import React from 'react';
-import { models } from '../utils/models';
+import { models, getModelPrice } from '../utils/models';
 
 interface ModelSelectorProps {
   provider: string;
@@ -13,28 +13,6 @@ interface ModelSelectorProps {
   imageStyle: 'natural' | 'vivid';
   onImageStyleChange: (style: 'natural' | 'vivid') => void;
 }
-
-const getModelPrice = (model: string): number => {
-  const prices: { [key: string]: number } = {
-    'gpt-4o': 0.03,
-    'gpt-4-turbo': 0.02,
-    'gpt-4': 0.015,
-    'gpt-3.5-turbo': 0.002,
-    'dall-e-3': 0.04,
-    'dall-e-2': 0.02,
-    'claude-3.5-sonnet-20241022': 0.015,
-    'claude-3.5-haiku-20241022': 0.01,
-    'claude-3-opus-20240229': 0.025,
-    'claude-3-sonnet-20240229': 0.015,
-    'claude-3-haiku-20240307': 0.008,
-    'command-r-plus-04-2024': 0.015,
-    'command-r-08-2024': 0.01,
-    'command': 0.008,
-    'command-light': 0.005,
-    'command-nightly': 0.012
-  };
-  return prices[model] || 0;
-};
 
 export const ModelSelector: React.FC<ModelSelectorProps> = ({
   provider,
@@ -56,12 +34,18 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({
       <div className="flex gap-4">
         <select
           value={provider}
-          onChange={(e) => onProviderChange(e.target.value)}
+          onChange={(e) => {
+            const newProvider = e.target.value;
+            onProviderChange(newProvider);
+            const firstModel = models[newProvider as keyof typeof models][0];
+            onModelChange(firstModel);
+          }}
           className="p-2 rounded bg-gray-700 text-white"
         >
           <option value="openai">OpenAI</option>
           <option value="anthropic">Anthropic</option>
           <option value="cohere">Cohere</option>
+          <option value="xai">xAI</option>
         </select>
 
         <select
@@ -71,7 +55,9 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({
         >
           {models[provider as keyof typeof models].map((m) => (
             <option key={m} value={m}>
-              {m}
+              {m} ({m.includes('dall-e') 
+                ? `$${getModelPrice(m).toFixed(2)}/image`
+                : `$${getModelPrice(m)}`}/M tokens)
             </option>
           ))}
         </select>

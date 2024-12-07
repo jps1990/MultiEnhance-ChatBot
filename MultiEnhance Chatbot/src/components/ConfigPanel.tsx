@@ -63,41 +63,59 @@ const ConfigPanel: React.FC<ConfigPanelProps> = ({
         </div>
 
         <div className="space-y-4">
-          <form onSubmit={(e) => e.preventDefault()} className="space-y-4">
-            <div>
+          <div className="space-y-4">
+            <form onSubmit={(e) => e.preventDefault()}>
               <label htmlFor="openaiApiKey">OpenAI API Key</label>
               <input
                 type="password"
                 id="openaiApiKey"
-                value={apiKeys.openai}
+                value={apiKeys.openai || ''}
                 onChange={(e) => handleApiKeyChange('openai', e.target.value)}
                 className="w-full p-2 rounded bg-gray-700 text-white"
                 placeholder="Enter your OpenAI API key"
+                autoComplete="new-password"
               />
-            </div>
-            <div>
+            </form>
+
+            <form onSubmit={(e) => e.preventDefault()}>
               <label htmlFor="anthropicApiKey">Anthropic API Key</label>
               <input
                 type="password"
                 id="anthropicApiKey"
-                value={apiKeys.anthropic}
+                value={apiKeys.anthropic || ''}
                 onChange={(e) => handleApiKeyChange('anthropic', e.target.value)}
                 className="w-full p-2 rounded bg-gray-700 text-white"
                 placeholder="Enter your Anthropic API key"
+                autoComplete="new-password"
               />
-            </div>
-            <div>
+            </form>
+
+            <form onSubmit={(e) => e.preventDefault()}>
               <label htmlFor="cohereApiKey">Cohere API Key</label>
               <input
                 type="password"
                 id="cohereApiKey"
-                value={apiKeys.cohere}
+                value={apiKeys.cohere || ''}
                 onChange={(e) => handleApiKeyChange('cohere', e.target.value)}
                 className="w-full p-2 rounded bg-gray-700 text-white"
                 placeholder="Enter your Cohere API key"
+                autoComplete="new-password"
               />
-            </div>
-          </form>
+            </form>
+
+            <form onSubmit={(e) => e.preventDefault()}>
+              <label htmlFor="xaiApiKey">xAI API Key</label>
+              <input
+                type="password"
+                id="xaiApiKey"
+                value={apiKeys.xai || ''}
+                onChange={(e) => handleApiKeyChange('xai', e.target.value)}
+                className="w-full p-2 rounded bg-gray-700 text-white"
+                placeholder="Enter your xAI API key"
+                autoComplete="new-password"
+              />
+            </form>
+          </div>
 
           <div>
             <label htmlFor="temperature" className="block mb-2">

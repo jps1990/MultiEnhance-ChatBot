@@ -1,4 +1,5 @@
-import axios from 'axios';
+import OpenAI from 'openai';
+import { ChatCompletionMessageParam } from 'openai/resources/chat/completions';
 
 export const makeOpenAIRequest = async (
   model: string,
@@ -7,41 +8,81 @@ export const makeOpenAIRequest = async (
   apiKey: string,
   uploadedFile: File | null
 ) => {
-  const headers = {
-    'Authorization': `Bearer ${apiKey}`,
-    'Content-Type': 'application/json',
-  };
+  const client = new OpenAI({
+    apiKey: apiKey,
+    dangerouslyAllowBrowser: true,
+    timeout: 30000,
+    maxRetries: 2
+  });
 
-  if (model === 'gpt-4-vision-preview' && uploadedFile) {
-    const base64Image = await fileToBase64(uploadedFile);
-    return axios.post(
-      'https://api.openai.com/v1/chat/completions',
-      {
-        model,
-        messages: [
-          {
-            role: 'user',
-            content: [
-              { type: 'text', text: prompt },
-              { type: 'image_url', image_url: { url: `data:image/jpeg;base64,${base64Image}` } }
-            ]
-          }
-        ],
-        max_tokens: 300,
-      },
-      { headers }
-    );
-  }
+  try {
+    let messages: ChatCompletionMessageParam[] = [];
 
-  return axios.post(
-    'https://api.openai.com/v1/chat/completions',
-    {
+    if (model === 'gpt-4-vision-preview' && uploadedFile) {
+      const base64Image = await fileToBase64(uploadedFile);
+      messages = [
+        {
+          role: 'user',
+          content: [
+            { type: 'text', text: prompt },
+            { 
+              type: 'image_url',
+              image_url: { url: `data:image/jpeg;base64,${base64Image}` }
+            }
+          ]
+        }
+      ];
+    } else {
+      messages = [
+        {
+          role: 'system',
+          content: 'You are a helpful AI assistant.'
+        },
+        {
+          role: 'user',
+          content: prompt
+        }
+      ];
+    }
+
+    const requestData = {
       model,
-      messages: [{ role: 'user', content: prompt }],
+      messages,
       temperature,
-    },
-    { headers }
-  );
+      stream: true as const,
+      max_tokens: 1000,
+      presence_penalty: 0.1,
+      frequency_penalty: 0.1
+    };
+
+    console.log('🚀 OpenAI Request:', JSON.stringify(requestData, null, 2));
+
+    const stream = await client.chat.completions.create(requestData);
+    let fullContent = '';
+
+    for await (const chunk of stream) {
+      const content = chunk.choices[0]?.delta?.content || '';
+      fullContent += content;
+      console.log('📝 Chunk received:', content);
+    }
+
+    const response = {
+      data: {
+        choices: [{
+          message: {
+            content: fullContent,
+            role: 'assistant'
+          }
+        }]
+      }
+    };
+
+    console.log('✅ OpenAI Full Response:', JSON.stringify(response, null, 2));
+    return response;
+  } catch (error) {
+    console.error('❌ OpenAI API Error:', error);
+    throw error;
+  }
 };
 
 const fileToBase64 = (file: File): Promise<string> => {

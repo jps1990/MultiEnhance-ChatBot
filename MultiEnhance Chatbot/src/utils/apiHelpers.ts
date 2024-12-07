@@ -3,6 +3,7 @@ import { ApiResponse } from '../types';
 import { makeOpenAIRequest } from './providers/openaiProvider';
 import { makeAnthropicRequest } from './providers/anthropicProvider';
 import { makeCohereRequest } from './providers/cohereProvider';
+import { makeXAIRequest } from './providers/xaiProvider';
 import { processApiResponse } from './messageHandlers';
 import { generateImage } from './imageHelpers';
 
@@ -74,6 +75,9 @@ export const handleApiCall = async (
         break;
       case 'cohere':
         response = await makeCohereRequest(model, prompt, temperature, apiKeys[provider]);
+        break;
+      case 'xai':
+        response = await makeXAIRequest(model, prompt, temperature, apiKeys[provider]);
         break;
       default:
         throw new Error(`Unsupported provider: ${provider}`);
